@@ -4,11 +4,6 @@
 
 Backs up every folder in your Unraid `appdata` share to Google Drive on a schedule. One `.tar.zst` per app, streamed straight to Drive (no temp space), pruned to the last N runs.
 
-## Build and publish
-1. Create a GitHub repo, push this folder to `main`. The included workflow publishes `ghcr.io/<you>/appdata-backup-gdrive:latest`.
-2. Make the package public (GitHub → Packages → settings).
-3. Edit `YOUR_GITHUB_USER` in `unraid-template.xml`.
-
 ## Install on Unraid (about two minutes)
 1. Open the Unraid web terminal and paste this one line (replace `YOUR_GITHUB_USER`):
    ```
