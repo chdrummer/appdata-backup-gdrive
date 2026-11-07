@@ -1,16 +1,16 @@
 <?xml version="1.0"?>
 <Container version="2">
   <Name>appdata-backup-gdrive</Name>
-  <Repository>ghcr.io/chdrummer/appdata-backup-gdrive:latest</Repository>
-  <Registry>https://github.com/chdrummer/appdata-backup-gdrive/pkgs/container/appdata-backup-gdrive</Registry>
+  <Repository>ghcr.io/YOUR_GITHUB_USER/appdata-backup-gdrive:latest</Repository>
+  <Registry>https://github.com/YOUR_GITHUB_USER/appdata-backup-gdrive/pkgs/container/appdata-backup-gdrive</Registry>
   <Network>bridge</Network>
   <MyIP/>
   <Shell>sh</Shell>
   <Privileged>false</Privileged>
-  <Support>https://github.com/chdrummer/appdata-backup-gdrive/issues</Support>
-  <Project>https://github.com/chdrummer/appdata-backup-gdrive</Project>
-  <TemplateURL>https://raw.githubusercontent.com/chdrummer/appdata-backup-gdrive/main/unraid-template.xml</TemplateURL>
-  <Icon>https://raw.githubusercontent.com/chdrummer/appdata-backup-gdrive/main/icon.png</Icon>
+  <Support>https://github.com/YOUR_GITHUB_USER/appdata-backup-gdrive/issues</Support>
+  <Project>https://github.com/YOUR_GITHUB_USER/appdata-backup-gdrive</Project>
+  <TemplateURL>https://raw.githubusercontent.com/YOUR_GITHUB_USER/appdata-backup-gdrive/main/unraid-template.xml</TemplateURL>
+  <Icon>https://raw.githubusercontent.com/YOUR_GITHUB_USER/appdata-backup-gdrive/main/icon.png</Icon>
   <Category>Backup: Tools:</Category>
   <WebUI>http://[IP]:[PORT:8080]/</WebUI>
   <Beta>false</Beta>
