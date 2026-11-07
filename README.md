@@ -5,12 +5,12 @@ Backs up every folder in your Unraid `appdata` share to Google Drive on a schedu
 ## Build and publish
 1. Create a GitHub repo, push this folder to `main`. The included workflow publishes `ghcr.io/<you>/appdata-backup-gdrive:latest`.
 2. Make the package public (GitHub → Packages → settings).
-3. Edit `YOUR_GITHUB_USER` in `unraid-template.xml`.
+3. Edit `chdrummer` in `unraid-template.xml`.
 
 ## Install on Unraid (about two minutes)
-1. Open the Unraid web terminal and paste this one line (replace `YOUR_GITHUB_USER`):
+1. Open the Unraid web terminal and paste this one line (replace `chdrummer`):
    ```
-   wget -O /boot/config/plugins/dockerMan/templates-user/my-appdata-backup-gdrive.xml https://raw.githubusercontent.com/YOUR_GITHUB_USER/appdata-backup-gdrive/main/unraid-template.xml
+   wget -O /boot/config/plugins/dockerMan/templates-user/my-appdata-backup-gdrive.xml https://raw.githubusercontent.com/chdrummer/appdata-backup-gdrive/main/unraid-template.xml
    ```
 2. Docker tab → **Add Container** → choose **appdata-backup-gdrive** from the Template list.
 3. Check the time zone, click **Apply**, then open the WebUI.
