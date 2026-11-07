@@ -14,7 +14,6 @@ Backs up every folder in your Unraid `appdata` share to Google Drive on a schedu
 
 The defaults suit most servers. Optional settings (staging folder, password) are under *Show more settings*.
 
-To get it into Community Apps for one-click installs, submit the repo through the Unraid forum's "Community Applications" thread.
 
 ## First run
 Open the web UI, follow the three steps under *Connect Google Drive*, then click *Back up now*.
