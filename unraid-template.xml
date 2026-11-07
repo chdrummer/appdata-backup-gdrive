@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<Container version="2">
+  <Name>appdata-backup-gdrive</Name>
+  <Repository>ghcr.io/chdrummer/appdata-backup-gdrive:latest</Repository>
+  <Registry>https://github.com/chdrummer/appdata-backup-gdrive/pkgs/container/appdata-backup-gdrive</Registry>
+  <Network>bridge</Network>
+  <MyIP/>
+  <Shell>sh</Shell>
+  <Privileged>false</Privileged>
+  <Support>https://github.com/chdrummer/appdata-backup-gdrive/issues</Support>
+  <Project>https://github.com/chdrummer/appdata-backup-gdrive</Project>
+  <TemplateURL>https://raw.githubusercontent.com/chdrummer/appdata-backup-gdrive/main/unraid-template.xml</TemplateURL>
+  <Icon>https://raw.githubusercontent.com/chdrummer/appdata-backup-gdrive/main/icon.png</Icon>
+  <Category>Backup: Tools:</Category>
+  <WebUI>http://[IP]:[PORT:8080]/</WebUI>
+  <Beta>false</Beta>
+  <Overview>Back up all your Unraid apps to Google Drive automatically.[br][br][b]Setup takes about two minutes:[/b][br]1. Click Apply and open the WebUI.[br]2. Follow the three steps to connect Google Drive.[br]3. Pick your apps and a schedule, then press "Back up now" to test.[br][br]Every app folder is compressed and uploaded on your schedule, old backups are cleaned up for you, and you can limit upload speed if your internet is slow. The defaults work for most people, so you can leave everything below as it is.</Overview>
+
+  <Config Name="WebUI port" Target="8080" Default="8080" Mode="tcp" Description="Port for the web page you use to set this up. Change it only if 8080 is already taken." Type="Port" Display="always" Required="true" Mask="false">8080</Config>
+  <Config Name="Appdata folder" Target="/source" Default="/mnt/user/appdata" Mode="ro" Description="The folder to back up. This is read-only, so your data can't be changed. Leave as is unless your appdata lives somewhere else." Type="Path" Display="always" Required="true" Mask="false">/mnt/user/appdata</Config>
+  <Config Name="Settings folder" Target="/config" Default="/mnt/user/appdata/appdata-backup-gdrive" Mode="rw" Description="Where this app keeps its settings and your Google Drive login." Type="Path" Display="always" Required="true" Mask="false">/mnt/user/appdata/appdata-backup-gdrive</Config>
+  <Config Name="Docker control" Target="/var/run/docker.sock" Default="/var/run/docker.sock" Mode="rw" Description="Lets the app briefly stop each container while it is backed up, so databases are saved safely, then start it again. Remove this only if you never want containers stopped." Type="Path" Display="always" Required="false" Mask="false">/var/run/docker.sock</Config>
+  <Config Name="Time zone" Target="TZ" Default="America/New_York" Mode="" Description="Used for your backup schedule. Example: Europe/London. List of names: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones" Type="Variable" Display="always" Required="true" Mask="false">America/New_York</Config>
+
+  <Config Name="Staging folder (optional)" Target="/staging" Default="" Mode="rw" Description="Optional. Enter a folder on a fast drive with free space, such as /mnt/cache/backup-staging. Needed only for the 'Package locally first' option, which keeps containers stopped for less time on slow internet. Leave blank to skip." Type="Path" Display="advanced" Required="false" Mask="false"></Config>
+  <Config Name="Web page password (optional)" Target="UI_PASSWORD" Default="" Mode="" Description="Optional. Protects the web page. Log in with username 'admin' and this password." Type="Variable" Display="advanced" Required="false" Mask="true"></Config>
+</Container>

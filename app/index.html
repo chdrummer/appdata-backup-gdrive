@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Appdata Backup to Google Drive</title>
+<style>
+:root{--bg:#e9eef0;--surface:#fbfcfc;--ink:#18232b;--muted:#5b6b75;--line:#c9d4d9;--accent:#0f766e;--accent-ink:#fff;--bad:#b42318;--ok:#0f766e;color-scheme:light}
+@media (prefers-color-scheme:dark){:root{--bg:#10181d;--surface:#17222a;--ink:#e6edf0;--muted:#8fa2ad;--line:#2a3943;--accent:#2dd4bf;--accent-ink:#06211e;--bad:#f97066;--ok:#2dd4bf;color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:760px;margin:0 auto;padding:32px 20px 64px}
+h1{font-size:1.6rem;margin:0 0 4px;letter-spacing:-.01em}
+h2{font-size:1.05rem;margin:0 0 4px}
+p.sub,.hint{color:var(--muted);margin:0 0 12px;font-size:.92rem}
+section{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:20px;margin-top:20px}
+.strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin:20px 0 0}
+.strip b{display:block;font-size:.8rem;font-weight:500;color:var(--muted)}
+.strip span{font-weight:600}
+.good{color:var(--ok)}.bad{color:var(--bad)}
+label{display:block;font-weight:600;font-size:.92rem;margin:14px 0 4px}
+input[type=text],input[type=number],textarea{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);font:inherit}
+textarea{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.88rem;min-height:84px}
+input:focus-visible,textarea:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.row{display:flex;gap:16px;flex-wrap:wrap}.row>div{flex:1;min-width:180px}
+.check{display:flex;gap:10px;align-items:flex-start;font-weight:600;margin:14px 0 0}
+.check input{margin-top:5px}.check small{display:block;font-weight:400;color:var(--muted)}
+button{font:inherit;font-weight:600;padding:9px 16px;border-radius:6px;border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink);cursor:pointer}
+button.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+button:disabled{opacity:.55;cursor:default}
+.actions{display:flex;gap:10px;align-items:center;margin-top:16px;flex-wrap:wrap}
+code{background:var(--bg);padding:1px 6px;border-radius:4px;font-size:.88em}
+pre{background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:12px;margin:0;max-height:300px;overflow:auto;font-size:.82rem;line-height:1.5;white-space:pre-wrap}
+ol{padding-left:20px;margin:0 0 8px}details summary{cursor:pointer;color:var(--muted);font-size:.9rem;margin-top:12px}
+#msg{font-size:.9rem}
+button.small{padding:3px 10px;font-size:.85rem}
+.apps-head{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.apps-head .hint{flex:1;margin:0;min-width:200px}
+.apps{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:2px 12px;margin-top:8px;padding:8px 10px;border:1px solid var(--line);border-radius:6px;background:var(--bg);max-height:260px;overflow:auto}
+label.app{display:flex;gap:8px;align-items:center;margin:0;padding:5px 0;font-weight:500;font-size:.92rem;overflow-wrap:anywhere}
+@media (prefers-reduced-motion:no-preference){button{transition:opacity .15s}}
+</style>
+</head>
+<body>
+<main>
+  <h1>Appdata backup to Google Drive</h1>
+  <p class="sub">Each app folder is compressed and sent straight to Drive on your schedule.</p>
+
+  <div class="strip">
+    <div><b>Google Drive</b><span id="s-drive">Checking…</span></div>
+    <div><b>Next backup</b><span id="s-next">–</span></div>
+    <div><b>Last backup</b><span id="s-last">Never run</span></div>
+    <div style="align-self:center"><button id="run">Back up now</button></div>
+  </div>
+
+  <section id="connect">
+    <h2>Connect Google Drive</h2>
+    <p class="hint">Google only allows sign-in through a browser, so you do this once on any computer:</p>
+    <ol>
+      <li>Install <a href="https://rclone.org/downloads/" target="_blank" rel="noopener">rclone</a> on your PC or Mac.</li>
+      <li>Run <code>rclone authorize "drive"</code> and sign in when the browser opens.</li>
+      <li>Copy the <code>{"access_token": …}</code> block it prints and paste it here.</li>
+    </ol>
+    <label for="token">Token</label>
+    <textarea id="token" placeholder='{"access_token":"…","token_type":"Bearer","refresh_token":"…","expiry":"…"}'></textarea>
+    <details>
+      <summary>Use my own Google API client (optional, avoids shared rate limits)</summary>
+      <div class="row"><div><label for="cid">Client ID</label><input type="text" id="cid"></div>
+      <div><label for="csec">Client secret</label><input type="text" id="csec"></div></div>
+      <p class="hint">Only fill these in if you also passed them to <code>rclone authorize "drive" CLIENT_ID CLIENT_SECRET</code>.</p>
+    </details>
+    <div class="actions"><button id="save-token">Connect</button><span id="tmsg"></span></div>
+  </section>
+
+  <section>
+    <h2>Schedule and storage</h2>
+    <label class="check"><input type="checkbox" id="enabled"><span>Run backups automatically</span></label>
+    <div class="row">
+      <div><label for="cron">Schedule (cron)</label><input type="text" id="cron"><p class="hint">Default is every day at 3:00 AM.</p></div>
+      <div><label for="folder">Drive folder</label><input type="text" id="folder"></div>
+      <div><label for="keep">Backups to keep</label><input type="number" id="keep" min="1"><p class="hint">Only fully successful backups count.</p></div>
+      <div><label for="limit">Upload speed limit (Mbps)</label><input type="number" id="limit" min="0" step="any"><p class="hint">0 means no limit. Set it below your connection speed so streaming and games stay smooth.</p></div>
+    </div>
+    <label class="check"><input type="checkbox" id="stop"><span>Stop each container while its folder is backed up
+      <small>Keeps databases consistent. Containers are matched by name to the appdata folder and restarted right after. Needs the Docker socket.</small></span></label>
+    <label class="check"><input type="checkbox" id="stage"><span>Package locally first, then upload
+      <small id="stage-hint">Containers are only stopped while the archive is written to your staging folder, not during the slow upload. Failed uploads are retried. Needs free space for your largest app.</small></span></label>
+    <label for="sdir">Staging folder</label>
+    <input type="text" id="sdir">
+    <p class="hint" id="sdir-msg">Used only when packaging locally first. Must be inside a path you mapped in the container settings. Archives are kept in an <code>appdata-backup-staging</code> subfolder there.</p>
+    <label>Apps to back up</label>
+    <div class="apps-head"><span class="hint" id="found"></span>
+      <button type="button" class="ghost small" id="all">Select all</button>
+      <button type="button" class="ghost small" id="none">Select none</button></div>
+    <div class="apps" id="apps"></div>
+    <label for="excl">Exclude files matching</label>
+    <textarea id="excl"></textarea>
+    <p class="hint">One pattern per line. Caches and logs are usually safe to leave out.</p>
+    <div class="actions"><button id="save">Save settings</button><span id="msg"></span></div>
+  </section>
+
+  <section>
+    <h2>Activity</h2>
+    <pre id="log">Nothing yet.</pre>
+    <details><summary>How to restore an app</summary>
+      <p class="hint">Stop the container, download <code>APP.tar.zst</code> from the dated folder in Drive, then run
+      <code>tar --zstd -xf APP.tar.zst -C /mnt/user/appdata</code> and start the container again.</p></details>
+  </section>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+let loaded=false, timer;
+const api=(u,b)=>fetch(u,b?{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(b)}:{}).then(async r=>{const j=await r.json();if(!r.ok)throw new Error(j.error||"Request failed");return j});
+const gb=n=>(n/1e9).toFixed(1)+" GB";
+const ago=iso=>new Date(iso).toLocaleString([], {dateStyle:"medium",timeStyle:"short"});
+
+let extraSkip=[];
+function renderApps(apps,skipStr){
+  const skip=skipStr.split(/[,\n]/).map(x=>x.trim()).filter(Boolean);
+  const lower=skip.map(x=>x.toLowerCase());
+  extraSkip=skip.filter(x=>!apps.some(a=>a.toLowerCase()===x.toLowerCase()));
+  const box=$("apps");box.textContent="";
+  apps.forEach(a=>{const l=document.createElement("label");l.className="app";
+    const i=document.createElement("input");i.type="checkbox";i.value=a;i.checked=!lower.includes(a.toLowerCase());i.onchange=countApps;
+    l.append(i,document.createTextNode(a));box.append(l)});
+  if(!apps.length)box.textContent="No app folders found in the appdata mount.";
+  countApps();
+}
+const boxes=()=>[...document.querySelectorAll("#apps input")];
+function countApps(){const b=boxes();$("found").textContent=b.length?`${b.filter(x=>x.checked).length} of ${b.length} selected. New apps are included automatically.`:""}
+$("all").onclick=()=>{boxes().forEach(x=>x.checked=true);countApps()};
+$("none").onclick=()=>{boxes().forEach(x=>x.checked=false);countApps()};
+async function refreshDrive(){
+  const d=await api("/api/drive");
+  const el=$("s-drive");
+  if(d.connected){el.className="good";el.textContent="Connected"+(d.total?` · ${gb(d.total-d.used)} free`:"");$("connect").querySelector("h2").textContent="Reconnect Google Drive"}
+  else{el.className="bad";el.textContent="Not connected"}
+}
+async function refresh(){
+  const s=await api("/api/status");
+  if(!loaded){
+    const c=s.settings;
+    $("enabled").checked=c.enabled;$("cron").value=c.cron;$("folder").value=c.folder;$("keep").value=c.keep;$("stage").checked=c.stage_locally;
+    $("sdir").value=c.staging_dir;checkStaging();$("limit").value=c.limit_mbps;
+    $("stop").checked=c.stop_containers;$("excl").value=c.excludes;
+    renderApps(s.apps,c.skip_apps);
+    loaded=true;
+  }
+  $("s-next").textContent=s.next_run?ago(s.next_run):"Not scheduled";
+  const l=s.last;
+  $("s-last").className=l?(l.result==="ok"?"good":"bad"):"";
+  $("s-last").textContent=l?`${ago(l.when)} · ${l.result==="ok"?"success":l.failed+" failed"}`:"Never run";
+  $("run").disabled=s.running;$("run").textContent=s.running?"Backing up…":"Back up now";
+  if(s.log.length){const p=$("log");const end=p.scrollTop+p.clientHeight>=p.scrollHeight-20;p.textContent=s.log.join("\n");if(end)p.scrollTop=p.scrollHeight}
+  clearTimeout(timer);timer=setTimeout(refresh,s.running?1500:10000);
+}
+async function checkStaging(){
+  const m=$("sdir-msg");
+  try{const r=await api("/api/staging-check",{path:$("sdir").value});
+    m.className=r.ok?"hint good":"hint bad";
+    m.textContent=r.ok?`Writable · ${gb(r.free)} free`:r.error}
+  catch(e){m.className="hint bad";m.textContent=e.message}
+}
+$("sdir").onchange=checkStaging;
+$("run").onclick=()=>api("/api/run",{}).then(refresh).catch(e=>alert(e.message));
+$("save-token").onclick=async()=>{
+  $("tmsg").textContent="Checking with Google…";
+  try{await api("/api/token",{token:$("token").value,client_id:$("cid").value,client_secret:$("csec").value});
+    $("tmsg").textContent="Connected.";$("token").value="";refreshDrive()}
+  catch(e){$("tmsg").textContent=e.message;$("tmsg").className="bad"}
+};
+$("save").onclick=async()=>{
+  try{await api("/api/settings",{enabled:$("enabled").checked,cron:$("cron").value,folder:$("folder").value,keep:$("keep").value,limit_mbps:$("limit").value,stage_locally:$("stage").checked,staging_dir:$("sdir").value,
+    stop_containers:$("stop").checked,skip_apps:[...boxes().filter(x=>!x.checked).map(x=>x.value),...extraSkip].join(", "),excludes:$("excl").value});
+    $("msg").className="good";$("msg").textContent="Saved.";refresh()}
+  catch(e){$("msg").className="bad";$("msg").textContent=e.message}
+};
+refreshDrive();refresh();
+</script>
+</body>
+</html>
