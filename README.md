@@ -8,7 +8,7 @@ Backs up every folder in your Unraid `appdata` share to Google Drive on a schedu
 3. Edit `chdrummer` in `unraid-template.xml`.
 
 ## Install on Unraid (about two minutes)
-1. Open the Unraid web terminal and paste this one line (replace `chdrummer`):
+1. Open the Unraid web terminal and paste this one line:
    ```
    wget -O /boot/config/plugins/dockerMan/templates-user/my-appdata-backup-gdrive.xml https://raw.githubusercontent.com/chdrummer/appdata-backup-gdrive/main/unraid-template.xml
    ```
